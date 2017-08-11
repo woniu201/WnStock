@@ -54,7 +54,6 @@ CWnStockView::CWnStockView()
 	bFirstCrossLine = TRUE; //用于分时和K线区画十字线
 	bCrossLine = FALSE; //用于分时和K线区画十字线
 
-	bUpDwonKey = FALSE;
 }
 
 CWnStockView::~CWnStockView()
