@@ -11,32 +11,11 @@
 
 #include <vector>
 #include <string>
-#include "include/sqlite3.h"
+
 
 using namespace std;
 
-/***************自定义类*******************/
-/*
-*	@ SqliteClient:操作sqlite类	
-*	@ woniu201
-*	@ 2017/08/03
-*/
-class WNSTOCKDLL_API SqliteClient{
 
-public:
-	SqliteClient();
-	~SqliteClient();
-
-	int SqliteClient_Open(char* dbName);
-	int SqliteClient_Insert(char* sql1, char* sql2);
-	int SqliteClient_Select(char* sql, int& nrow, int& ncolumn, char**& data);
-	int SqliteClient_Update(char* sql1, char* sql2);
-	int SqliteClient_Delete(char* sql);
-
-private:
-	sqlite3* db;
-	char*	errMsg;	
-};
 
 /*
 *	@ StockData:获取Stock数据类
