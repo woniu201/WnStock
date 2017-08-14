@@ -504,7 +504,7 @@ void CWnStockView::DrowKLineUI(CDC* pDC)
 
 	//写最下面边框的文字
 	pDC->SetTextColor(RGB(255,255,255));
-	sprintf(chName, "%8s", "◆蜗牛201作品： QQ:879268496            email:wangpengfei.201@163.com");
+	sprintf(chName, "%8s", "◆蜗牛201作品： QQ:731342182            email:wangpengfei.201@163.com");
 	pDC->TextOut(15, rect.bottom - 28, chName, lstrlen(chName));
 	//写右上角的文字	               
 	pDC->SetTextColor(RGB(255,255,0));
@@ -979,6 +979,9 @@ void CWnStockView::DrawMacd(int i)
 	}
 	return;
 }
+
+/******************************** 分时线部分 **************************************************/
+
 /********************************* 三界面公用函数部分 ******************************************/
 int CWnStockView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
