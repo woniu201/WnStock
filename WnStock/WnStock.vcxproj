@@ -95,6 +95,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
+    <None Include="ClassDiagram2.cd" />
     <None Include="ReadMe.txt" />
     <None Include="res\Toolbar.bmp" />
     <None Include="res\Toolbar256.bmp" />

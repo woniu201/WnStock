@@ -75,6 +75,10 @@ public:
 	BOOL		bFirstCrossLine;//是否第一次画十字线
 	BOOL		bCrossLine;		//是否交叉
 
+	//分时线
+	double		m_interMinH;	//分时线间隔高度
+	double		m_interMinW;	//分时线间隔宽度
+
 /******************自定义函数******************************/
 protected:
 	//自选股UI所用函数
@@ -87,6 +91,13 @@ protected:
 	void		DrawMaLine();						//画MA线
 	void		ShowKData(int i);					//K线展示数据
 	void		DrawMacd(int i);					//画MACD
+
+	//分时线UI所有函数
+	void		DrowMinLineUI(CDC* pDC);			//画分时线框架
+	void		ShowMinData();						//数据显示
+	void		DrowMinLine();						//画分时线
+	static UINT ThreadGetMinData(LPVOID lParam);	//获取分时数据线程
+
 public:
 	virtual void OnInitialUpdate();
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
@@ -94,7 +105,7 @@ public:
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg int  OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnAddMystock();
 	afx_msg void OnDelMystock();
 
