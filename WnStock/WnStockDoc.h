@@ -52,8 +52,10 @@ public:
 	/****************自定义变量和函数******************/
 	
 //自选股容器，变量和函数
-	vector<string>	vMystock;
+	vector<string>		vMystock;					//自选股信息
+	vector<AllStock*>	vAllStock;					//所有股票信息
 	void			ReadMystock();					//获取自选股股票代码
+	void			ReadAllStock();					//获取所有股票信息(代码，名称)
 	void			WriteMystock();					//保存自选股到本地数据库(sqlite)
 	void			GetMytockData();				//获取所有自选股的数据
 	vector<RealTimeStock*> vMystockRealTimeData;	//自选股实时数据容器

@@ -1,6 +1,11 @@
-﻿
-// MainFrm.cpp : CMainFrame 类的实现
-//
+﻿/********************************************************
+Copyright (C), 2016-2017,
+FileName: 	MainFrm
+Author: 	woniu201
+Email: 		wangpengfei.201@163.com
+Created: 	2017/11/07
+Description:单文档框架类
+********************************************************/
 
 #include "stdafx.h"
 #include "WnStock.h"
@@ -29,6 +34,11 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_APPLOOK_WIN_2000, ID_VIEW_APPLOOK_WINDOWS_7, &CMainFrame::OnUpdateApplicationLook)
 	ON_WM_TIMER()
 	ON_WM_SYSCOMMAND()
+	ON_REGISTERED_MESSAGE(AFX_WM_RESETTOOLBAR, &CMainFrame::OnToolbarReset)
+	ON_COMMAND(ID_TOOLBAR_BUT_ESC, &CMainFrame::OnToolbarButEsc)
+	ON_COMMAND(ID_TOOLBAR_BUT_DAYK, &CMainFrame::OnToolbarButDayk)
+	ON_COMMAND(ID_TOOLBAR_BUT_WEEKK, &CMainFrame::OnToolbarButWeekk)
+	ON_COMMAND(ID_TOOLBAR_BUT_MONTHK, &CMainFrame::OnToolbarButMonthk)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -62,8 +72,12 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	BOOL bNameValid;
+
 	// 基于持久值设置视觉管理器和样式
 	OnApplicationLook(theApp.m_nAppLook);
+
+	// 设置用于绘制所有用户界面元素的视觉管理器
+	//CMFCVisualManager::SetDefaultManager(RUNTIME_CLASS(CMFCVisualManagerVS2008));
 
 	if (!m_wndMenuBar.Create(this))
 	{
@@ -76,22 +90,27 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// 防止菜单栏在激活时获得焦点
 	CMFCPopupMenu::SetForceMenuFocus(FALSE);
 
-	if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
-		!m_wndToolBar.LoadToolBar(theApp.m_bHiColorIcons ? IDR_MAINFRAME_256 : IDR_MAINFRAME))
+	if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC ) ||
+		!m_wndToolBar.LoadToolBar(IDR_MAINFRAME_256))
 	{
 		TRACE0("未能创建工具栏\n");
 		return -1;      // 未能创建
 	}
 
+	//修改工具栏背景颜色
+	HBRUSH newBr=CreateSolidBrush(RGB(212,122,212));
+	SetClassLong(m_wndToolBar.m_hWnd,GCL_HBRBACKGROUND,(long)newBr);
+	
 	CString strToolBarName;
 	bNameValid = strToolBarName.LoadString(IDS_TOOLBAR_STANDARD);
 	ASSERT(bNameValid);
 	m_wndToolBar.SetWindowText(strToolBarName);
 
-	CString strCustomize;
-	bNameValid = strCustomize.LoadString(IDS_TOOLBAR_CUSTOMIZE);
-	ASSERT(bNameValid);
-	m_wndToolBar.EnableCustomizeButton(TRUE, ID_VIEW_CUSTOMIZE, strCustomize);
+	//工具栏自定义下拉菜单
+// 	CString strCustomize;
+// 	bNameValid = strCustomize.LoadString(IDS_TOOLBAR_CUSTOMIZE);
+// 	ASSERT(bNameValid);
+// 	m_wndToolBar.EnableCustomizeButton(TRUE, ID_VIEW_CUSTOMIZE, strCustomize);
 
 	// 允许用户定义的工具栏操作:
 	InitUserToolbars(NULL, uiFirstUserToolBarId, uiLastUserToolBarId);
@@ -110,6 +129,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	DockPane(&m_wndMenuBar);
 	DockPane(&m_wndToolBar);
 
+	//工具栏显示文字
+	m_wndToolBar.EnableTextLabels(TRUE);
+
+/*************************状态栏部分**********************************/
 
 	//修改状态栏外观
 	CRect cRect;
@@ -119,10 +142,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndStatusBar.SetPaneInfo(1,m_wndStatusBar.GetDlgCtrlID(),SBPS_STRETCH,  2*width);
 	m_wndStatusBar.SetPaneInfo(2,m_wndStatusBar.GetDlgCtrlID(),SBPS_STRETCH,  2*width);
 	m_wndStatusBar.SetPaneInfo(3,m_wndStatusBar.GetDlgCtrlID(),SBPS_STRETCH,  width);
-// 	m_wndStatusBar.SetPaneInfo(0,m_wndStatusBar.GetDlgCtrlID(),SBPS_DISABLED,  2*width);
-// 	m_wndStatusBar.SetPaneInfo(1,m_wndStatusBar.GetDlgCtrlID(),SBPS_DISABLED,  2*width);
-// 	m_wndStatusBar.SetPaneInfo(2,m_wndStatusBar.GetDlgCtrlID(),SBPS_DISABLED,  2*width);
-// 	m_wndStatusBar.SetPaneInfo(3,m_wndStatusBar.GetDlgCtrlID(),SBPS_DISABLED,  width);
 
 	for(int i=0; i<4; i++)
 	{
@@ -174,6 +193,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 // 	lstBasicCommands.AddTail(ID_VIEW_APPLOOK_WINDOWS_7);
 // 
 // 	CMFCToolBar::SetBasicCommands(lstBasicCommands);
+
+// 	m_wndToolBar.ModifyStyle(0, BTNS_SHOWTEXT | TBSTYLE_EX_MIXEDBUTTONS | TBSTYLE_LIST);
+// 	m_wndToolBar.SetButtonText(0, "返回");
+// 	m_wndToolBar.SetButtonText(1, "周期");
 
 	return 0;
 }
@@ -426,24 +449,42 @@ void CMainFrame::OnTimer(UINT_PTR nIDEvent)
 */
 void CMainFrame::OnSysCommand(UINT nID, LPARAM lParam)
 {
- 	CWnStockView *pWnd;
- 	pWnd = (CWnStockView *)GetWindow(GW_CHILD); 
+ 	CWnStockView* pView = (CWnStockView *)GetActiveView();
+	CWnStockDoc* pDoc = (CWnStockDoc *)GetActiveDocument();
 
-	if (nID == SC_MAXIMIZE )
+	if (pView->m_drawStatus == 1) //K线部分
 	{
-		pWnd->bFirstCrossLine = TRUE;
-		pWnd->bCrossLine = FALSE;
-		OutputDebugString("SC_MAXIMIZE");
+		if (nID == SC_MAXIMIZE)
+		{
+			pView->bFirstCrossLine = TRUE;
+			pView->bCrossLine = FALSE;
+		}
+		else if (nID == SC_MINIMIZE)
+		{
+		}
+		else if (nID == SC_RESTORE)
+		{
+			pView->bFirstCrossLine = TRUE;
+			pView->bCrossLine = FALSE;
+		}
+	}else if (pView->m_drawStatus == 2) //分时部分
+	{
+		if (nID == SC_MAXIMIZE)
+		{
+			pView->bGetPoint = TRUE;
+		}
+		else if (nID == SC_MINIMIZE)
+		{
+		}
+		else if (nID == SC_RESTORE)
+		{
+			
+		}else if (nID == 0xF012)
+		{
+			pView->bGetPoint = TRUE;
+		}
 	}
-	else if (nID == SC_MINIMIZE )
-	{
-		OutputDebugString("SC_MINIMIZE");
-	}else if (nID == SC_RESTORE)
-	{
-		pWnd->bFirstCrossLine = TRUE;
-		pWnd->bCrossLine = FALSE;
-		OutputDebugString("SC_RESTORE");
-	}
+
 	CFrameWndEx::OnSysCommand(nID, lParam);
 }
 
@@ -455,4 +496,122 @@ void CMainFrame::ActivateFrame(int nCmdShow)
 	//nCmdShow   =   SW_SHOWMAXIMIZED;
 	//nCmdShow   =   SW_MAX;
 	CFrameWndEx::ActivateFrame(nCmdShow);
+}
+
+
+/*
+函数名称：OnToolbarReset(WPARAM wp,LPARAM)
+函数功能：重绘工具栏，实现工具栏下拉按钮功能
+*/
+LRESULT CMainFrame::OnToolbarReset(WPARAM wp,LPARAM)
+{
+	UINT uiToolBarId = (UINT) wp;
+	switch (uiToolBarId)
+	{
+	case IDR_MAINFRAME_256:
+		{   
+			//Replace CMFCToolBarComboBoxButton
+			m_comboButton = new CMFCToolBarComboBoxButton(ID_TOOLBAR_BUT_K, GetCmdMgr()->GetCmdImage(ID_TOOLBAR_BUT_K/*, FALSE*/), CBS_DROPDOWNLIST,100);
+			
+			HMENU hMenu = CreateMenu();//CreatePopupMenu();
+			AppendMenu(hMenu, MF_STRING, ID_TOOLBAR_BUT_DAYK, _T("日   线"));
+			AppendMenu(hMenu, MF_STRING, ID_TOOLBAR_BUT_WEEKK, _T("周   线"));
+			AppendMenu(hMenu, MF_STRING, ID_TOOLBAR_BUT_MONTHK, _T("月   线"));
+			CMFCToolBarMenuButton btnMenuRoot( (UINT)-1, hMenu, 0, "周  期");
+			btnMenuRoot.m_bText = FALSE;   
+			btnMenuRoot.m_bImage = TRUE;   
+			btnMenuRoot.m_nStyle |= TBBS_DROPDOWN;
+			btnMenuRoot.m_nStyle &= ~TBBS_BUTTON;
+			m_wndToolBar.ReplaceButton(ID_TOOLBAR_BUT_K, btnMenuRoot);
+
+		}                              
+		break;                                        
+	}
+
+	return 0;
+}
+
+void CMainFrame::OnToolbarButEsc()
+{
+	CWnStockDoc* pDoc = (CWnStockDoc*)GetActiveDocument();
+	CWnStockView* pView = (CWnStockView*)GetActiveView();
+	pView->bScroll = TRUE;
+	pView->OnInitialUpdate();
+
+	pView->m_drawStatus = 0;
+	pView->m_stockCode = "";
+	pView->m_stockName = "";
+	pDoc->GetMytockData();
+	pView->Invalidate();
+}
+
+
+void CMainFrame::OnToolbarButDayk()
+{
+	CWnStockDoc* pDoc = (CWnStockDoc*)GetActiveDocument();
+	CWnStockView* pView = (CWnStockView*)GetActiveView();
+
+	pView->bScroll = false;
+	pView->OnInitialUpdate();
+	pView->m_drawStatus = 1;
+	pDoc->stockDoc->KDay = 60;
+	pDoc->stockDoc->GetDayKData(pView->m_stockCode.GetBuffer(pView->m_stockCode.GetLength()));
+	Invalidate();
+}
+
+
+void CMainFrame::OnToolbarButWeekk()
+{
+	CWnStockDoc* pDoc = (CWnStockDoc*)GetActiveDocument();
+	CWnStockView* pView = (CWnStockView*)GetActiveView();
+
+	pView->bScroll = false;
+	pView->OnInitialUpdate();
+	pView->m_drawStatus = 1;
+	//pDoc->stockDoc->KDay = 60;
+	pDoc->stockDoc->GetWeekKStockData(pView->m_stockCode.GetBuffer(pView->m_stockCode.GetLength()));
+
+//初始化变量
+	//获取周数
+	int weekNum = pDoc->stockDoc->vKData.size();
+	if (weekNum < 60)
+	{
+		pDoc->stockDoc->KDay = weekNum/2;
+	}
+	else
+	{
+		pDoc->stockDoc->KDay = 60;
+	}
+	pDoc->stockDoc->KBegin = 0;
+	pDoc->stockDoc->KPos = 0;
+	Invalidate();
+}
+
+
+
+void CMainFrame::OnToolbarButMonthk()
+{
+	CWnStockDoc* pDoc = (CWnStockDoc*)GetActiveDocument();
+	CWnStockView* pView = (CWnStockView*)GetActiveView();
+
+	pView->bScroll = false;
+	pView->OnInitialUpdate();
+	pView->m_drawStatus = 1;
+	//pDoc->stockDoc->KDay = 60;
+	pDoc->stockDoc->GetMonthKStockData(pView->m_stockCode.GetBuffer(pView->m_stockCode.GetLength()));
+
+	//初始化变量
+	//获取周数
+	int monthNum = pDoc->stockDoc->vKData.size();
+	if (monthNum < 60)
+	{
+		pDoc->stockDoc->KDay = monthNum/2;
+	}
+	else
+	{
+		pDoc->stockDoc->KDay = 60;
+	}
+	pDoc->stockDoc->KBegin = 0;
+	pDoc->stockDoc->KPos = 0;
+	Invalidate();
 }

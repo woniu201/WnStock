@@ -167,6 +167,7 @@ protected:
 // 实现
 protected:
 	DECLARE_MESSAGE_MAP()
+
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
@@ -208,6 +209,4 @@ void CWnStockApp::SaveCustomState()
 }
 
 // CWnStockApp 消息处理程序
-
-
 

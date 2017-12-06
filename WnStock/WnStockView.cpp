@@ -1,6 +1,11 @@
-﻿
-// WnStockView.cpp : CWnStockView 类的实现
-//
+﻿/********************************************************
+Copyright (C), 2016-2017,
+FileName: 	WnStockView
+Author: 	woniu201
+Email: 		wangpengfei.201@163.com
+Created: 	2017/11/07
+Description:单文档视图类,用于画图
+********************************************************/
 
 #include "stdafx.h"
 // SHARED_HANDLERS 可以在实现预览、缩略图和搜索筛选器句柄的
@@ -12,7 +17,7 @@
 #include <stdio.h>
 #include "WnStockDoc.h"
 #include "WnStockView.h"
-
+#include "KeyboardFairy.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -50,6 +55,8 @@ CWnStockView::CWnStockView()
 	m_selectLine = 1;
 	m_mouseLine = 1;
 	m_posY = 0;
+	
+	bGetPoint = FALSE;
 
 	bFirstCrossLine = TRUE; //用于分时和K线区画十字线
 	bCrossLine = FALSE; //用于分时和K线区画十字线
@@ -411,7 +418,8 @@ BOOL CWnStockView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 */
 void CWnStockView::OnAddMystock()
 {
-
+	CWnStockDoc* pDoc = GetDocument();
+	pDoc->AddMystock(m_stockCode.GetBuffer(m_stockCode.GetLength()));
 }
 
 /*
@@ -1067,7 +1075,7 @@ void CWnStockView::DrowMinLineUI(CDC* pDC)
 
 	//写最下面边框的文字
 	pDC->SetTextColor(RGB(255,255,255));
-	sprintf(chName, "%8s", "◆蜗牛201作品： QQ:879268496            email:wangpengfei.201@163.com");
+	sprintf(chName, "%8s", "◆蜗牛201作品： QQ:731342182            email:wangpengfei.201@163.com");
 	pDC->TextOut(15, rect.bottom - 28, chName, lstrlen(chName));
 
 	//写右上角的文字
@@ -1121,14 +1129,13 @@ void CWnStockView::DrowMinLineUI(CDC* pDC)
 	pDC->TextOut(44+m_interMinW*2, 37+m_interMinH*18, "13:00", lstrlen("13:00"));
 	pDC->TextOut(44+m_interMinW*3, 37+m_interMinH*18, "14:00", lstrlen("14:00"));
 	pDC->TextOut(44+m_interMinW*4, 37+m_interMinH*18, "15:00", lstrlen("15:00"));
-
-	//pDoc->GetMinData(pDoc->stockCode);
-// 	pDoc->GetMinPoint();
-// 	ShowMinData();
-// 	DrawMinLine();
-
-	pDoc->stockDoc->GetDayMinPoint(m_interMinH, m_interMinW);
-	DrowMinLine();
+	
+	if (bGetPoint)
+	{
+		pDoc->stockDoc->GetDayMinPoint(m_interMinH, m_interMinW);
+		bGetPoint = false;
+	}
+	DrawMinLine();
 	ShowMinData();
 
 }
@@ -1448,7 +1455,7 @@ void CWnStockView::ShowMinData()
 	return;
 }
 
-void CWnStockView::DrowMinLine()
+void CWnStockView::DrawMinLine()
 {
 	CWnStockDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
@@ -1493,6 +1500,7 @@ void CWnStockView::DrowMinLine()
 	return ;
 }
 
+
 UINT CWnStockView::ThreadGetMinData(LPVOID lParam)
 {
 	CWnStockView* pThis = (CWnStockView*)lParam;
@@ -1501,10 +1509,14 @@ UINT CWnStockView::ThreadGetMinData(LPVOID lParam)
 
 	while(1)
 	{
-		if ((stockTime.bExchange()) && (pThis->m_drawStatus == 2))
+		//if ((stockTime.bExchange()) && (pThis->m_drawStatus == 2))
+		if (pThis->m_drawStatus == 2)
 		{
+
 			pDoc->stockDoc->GetDayMinData(pThis->m_stockCode.GetBuffer(pThis->m_stockCode.GetLength()));
+			pDoc->stockDoc->GetDayMinPoint(pThis->m_interMinH, pThis->m_interMinW);
 			OutputDebugString("获得数据成功\n");
+
 			pThis->Invalidate();
 		}
 		Sleep(10*1000);
@@ -1645,7 +1657,7 @@ void CWnStockView::OnMouseMove(UINT nFlags, CPoint point)
 void CWnStockView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	CWnStockDoc* pDoc = GetDocument();
-	if (m_drawStatus == 0)
+	if ((m_drawStatus == 0) && (pDoc->vMystock.size() != 0))
 	{
 		m_selectLine = m_mouseLine;
 		Invalidate();
@@ -1789,13 +1801,14 @@ void CWnStockView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			m_drawStatus = 0;
 			m_stockCode = "";
 			m_stockName = "";
+			pDoc->GetMytockData();
 			Invalidate();
 			return;
 		}
 	default:
 		{
-// 			CSearch cSearch;
-// 			cSearch.DoModal();
+			CKeyboardFairy cKeyboardFairy;
+			cKeyboardFairy.DoModal();
 			return;
 		}
 	}
@@ -1816,7 +1829,14 @@ void CWnStockView::OnLButtonDblClk(UINT nFlags, CPoint point)
 		OnInitialUpdate();
 		m_drawStatus = 2;
 		pDoc->stockDoc->GetDayMinData(m_stockCode.GetBuffer(m_stockCode.GetLength()));
-		
+
+		//此时view类没有创建，需要获取当前窗口的大小，减少画图中大量计算(否则会出现闪屏现象)，画图前已经获得MIN数据和坐标点坐标
+		CRect rect;	
+		GetClientRect (&rect);
+		m_interMinH = (rect.bottom - 110)/18;  
+		m_interMinW = (rect.right - 322)/4;
+		pDoc->stockDoc->GetDayMinPoint(m_interMinH, m_interMinW);
+		int n = pDoc->stockDoc->vMinData.size();
 		Invalidate();
 	}
 	else if (m_drawStatus == 2)

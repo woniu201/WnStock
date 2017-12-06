@@ -1,6 +1,11 @@
-
-// WnStockDoc.cpp : CWnStockDoc 类的实现
-//
+/********************************************************
+Copyright (C), 2016-2017,
+FileName: 	WnStockDoc
+Author: 	woniu201
+Email: 		wangpengfei.201@163.com
+Created: 	2017/11/07
+Description:单文档文档类
+********************************************************/
 
 #include "stdafx.h"
 // SHARED_HANDLERS 可以在实现预览、缩略图和搜索筛选器句柄的
@@ -11,6 +16,7 @@
 
 #include "WnStockDoc.h"
 #include "WnStockView.h"
+#include "KeyboardFairy.h"
 
 #include <propkey.h>
 
@@ -31,33 +37,20 @@ END_MESSAGE_MAP()
 CWnStockDoc::CWnStockDoc()
 {
 	// TODO: 在此添加一次性构造代码
-
-// 	while (1)
-// 	{
-// 		RealTimeStock* realTimeStock = (RealTimeStock *) malloc(sizeof(RealTimeStock));
-// 		StockData stockData;
-// 		stockData.GetRealTimeStockData("600016", realTimeStock);
-// 		free(realTimeStock);
-// 		realTimeStock = NULL;
-// 
-// 	}
-
-	//GetDayMinData("600016");
-	
-
-//  	StockData stockData;
-//  	stockData.GetMinStockData("600016");
 	stockDoc = new StockDoc();
 
 
 	ReadMystock();
 	GetMytockData();
 	stockDoc->KDay = 60;		//默认画60天K线
-	stockDoc->KPos = 0;		//默认偏移量
+	stockDoc->KPos = 0;			//默认偏移量
 	stockDoc->KBegin = 0;		//开始显示的K线索引	
 	
 	//GetDayKData("600016");
 	
+	ReadAllStock();
+	int n = vAllStock.size();
+
 }
 
 CWnStockDoc::~CWnStockDoc()
@@ -176,16 +169,22 @@ void CWnStockDoc::ReadMystock()
 }
 
 /*
-*	@ 保存My Stock代码
+*	@读取所有股票代码
 */
-void CWnStockDoc::WriteMystock()
+void CWnStockDoc::ReadAllStock()
 {
-	
+	StockData stockData;
+	vAllStock = stockData.ReadAllStock();
 }
+
+
 
 void CWnStockDoc::AddMystock(char* stockCode)
 {
 	vMystock.push_back(stockCode);
+	StockData stockData;
+	stockData.WriteMystockCode(vMystock);
+
 }
 
 void CWnStockDoc::DelMystock(char* stockCode)
@@ -201,6 +200,9 @@ void CWnStockDoc::DelMystock(char* stockCode)
 		}
 	}
 	
+	//保存股票代码到本地存储区
+	StockData stockData;
+	stockData. WriteMystockCode(vMystock);
 }
 
 void CWnStockDoc::GetMytockData()

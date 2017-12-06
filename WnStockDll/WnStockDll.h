@@ -23,6 +23,12 @@ using namespace std;
 *	@ 2017/08/03
 */
 
+struct AllStock 
+{
+	char stockCode[32];
+	char stockName[64];
+};
+
 struct RealTimeStock
 {
 	char		strStockNum[32];
@@ -106,7 +112,9 @@ struct KVolumePoint     //K线价格对应的坐标结构体
 class WNSTOCKDLL_API StockData
 {
 public:
-	vector<string> ReadMystockCode();
+	vector<string>		ReadMystockCode();
+	void				WriteMystockCode(vector <string> vMyStock);
+	vector<AllStock*>	ReadAllStock();
 	/************My Stock********************/
 	bool GetRealTimeStockData(char* stockCode, RealTimeStock* realTimeStock);
 	bool GetRealTimeMarketData(char* code, RealTimeMarket* realTimeMarket);
@@ -118,6 +126,7 @@ public:
 	bool					GetKStockData1(char* stockCode);
 	bool					GetMinStockData(char* stockCode);
 private:
+	char* UTF8ToGB2312(const char* strUtf8);
 };
 
 /*
@@ -177,6 +186,8 @@ public:
 	float minMACD;            //显示范围内最小macd值
 
 	void GetDayKData(char* stockCode);						//获取K线历史数据，保存到"WnStockDll.h"中的vKStockData中
+	void GetWeekKStockData(char* stockCode);				//获取周K历史数据，保存到"WnStockDll.h"中的vWeekKStockData中
+	void GetMonthKStockData(char* stockCode);				//获取月K历史数据，保存到"WnStockDll.h"中的vMonthKStockData中
 	void GetKPoint(double m_interKH,double m_interKW);		//获得K线的坐标点
 	void GetKVolumePoint(double m_interKH, double m_interKW);//获得成交量坐标
 	void GetMaPrice();										//获取均线的价格
@@ -197,6 +208,9 @@ public:
 	void GetDayMinPoint(double m_interMinH, double m_interMinW);//获取分时线的坐标数据
 	double					fLimitPrice;					//该价格为离中间线最远的最低价或最高价
 
+private:
+	vector<KStock*>			vWeekKStockData;
+	vector<KStock*>			vMonthKStockData;
 };
 
 

@@ -78,7 +78,7 @@ public:
 	//分时线
 	double		m_interMinH;	//分时线间隔高度
 	double		m_interMinW;	//分时线间隔宽度
-
+	bool		bGetPoint;		//画图过程中(OnDraw函数)是否重新计算坐标点，计算会出现闪屏显现，只在窗口大小发生变化时计算，其他在画图前计算
 /******************自定义函数******************************/
 protected:
 	//自选股UI所用函数
@@ -95,7 +95,7 @@ protected:
 	//分时线UI所有函数
 	void		DrowMinLineUI(CDC* pDC);			//画分时线框架
 	void		ShowMinData();						//数据显示
-	void		DrowMinLine();						//画分时线
+	void		DrawMinLine();						//画分时线
 	static UINT ThreadGetMinData(LPVOID lParam);	//获取分时数据线程
 
 public:

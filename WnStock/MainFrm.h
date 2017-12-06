@@ -36,6 +36,7 @@ protected:  // 控件条嵌入成员
 	CMFCStatusBar     m_wndStatusBar;
 	CMFCToolBarImages m_UserImages;
 
+	CMFCToolBarComboBoxButton  *m_comboButton;
 
 // 生成的消息映射函数
 protected:
@@ -50,6 +51,11 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	virtual void ActivateFrame(int nCmdShow = -1);
+	afx_msg LRESULT OnToolbarReset(WPARAM,LPARAM);
+	afx_msg void OnToolbarButEsc();
+	afx_msg void OnToolbarButDayk();
+	afx_msg void OnToolbarButWeekk();
+	afx_msg void OnToolbarButMonthk();
 };
 
 
