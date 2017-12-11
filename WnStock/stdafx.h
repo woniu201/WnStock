@@ -41,6 +41,7 @@
 #ifdef _DEBUG
 #pragma comment(lib, "../Debug/WnStockDll.lib")
 #else
+#pragma comment(lib, "../Release/WnStockDll.lib")
 #endif
 
 
