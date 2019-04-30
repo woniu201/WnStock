@@ -28,13 +28,13 @@ WnStock是个开源的查看股票行情软件，使用VC++/MFC开发，IDE选�
 12.BUG修复：解决分时线界面闪屏问题，解决JSON解析崩溃问题(2017-12-11更新)
 
 ### 自选股界面
-![自选股界面](https://img-blog.csdn.net/20170811143419489?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvd29uaXUyMTExMTE=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center)
+![自选股界面](https://img-blog.csdn.net/20170811143419489)
 
 ### K线界面
-![K线界面](https://img-blog.csdn.net/20171106214453040?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvd29uaXUyMTExMTE=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center)
+![K线界面](https://img-blog.csdn.net/20171106214453040)
 
 ### 分时线界面
-![分时线界面](http://img.blog.csdn.net/20171106214229440?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvd29uaXUyMTExMTE=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center)
+![分时线界面](http://img.blog.csdn.net/20171106214229440)
 
 ## 其他
 
